@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, type Category } from "@/lib/categories";
 import type { NewRestockItem, Priority } from "@/lib/types";
 
 type ItemFormProps = {
@@ -10,7 +10,7 @@ type ItemFormProps = {
 
 export default function ItemForm({ onAdd }: ItemFormProps) {
   const [productName, setProductName] = useState("");
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [category, setCategory] = useState<Category>(CATEGORIES[0]);
   const [reason, setReason] = useState("");
   const [priority, setPriority] = useState<Priority>("medium");
 
@@ -51,7 +51,10 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
 
         <label className="field">
           <span>카테고리</span>
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <select
+  value={category}
+  onChange={(e) => setCategory(e.target.value as Category)}
+>
             {CATEGORIES.map((name) => (
               <option key={name} value={name}>
                 {name}
