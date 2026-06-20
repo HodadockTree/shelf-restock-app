@@ -20,11 +20,11 @@ export default function Home() {
   }, [items, ready]);
 
   const addItem = (input: NewRestockItem) => {
-    const item: RestockItem = {
-      ...input,
-      id: crypto.randomUUID(),
-      checked: false,
-    };
+  const item: RestockItem = {
+    ...input,
+    id: Date.now().toString(),
+    checked: false,
+  };
     setItems((prev) => [item, ...prev]);
   };
 

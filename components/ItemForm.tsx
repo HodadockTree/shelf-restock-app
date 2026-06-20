@@ -1,8 +1,9 @@
 "use client";
 
+import { PRODUCTS } from "@/lib/products";
 import { FormEvent, useState } from "react";
 import { CATEGORIES, type Category } from "@/lib/categories";
-import type { NewRestockItem, Priority } from "@/lib/types";
+import type { NewRestockItem } from "@/lib/types";
 
 type ItemFormProps = {
   onAdd: (item: NewRestockItem) => void;
@@ -10,9 +11,11 @@ type ItemFormProps = {
 
 export default function ItemForm({ onAdd }: ItemFormProps) {
   const [productName, setProductName] = useState("");
+  const filteredProducts = PRODUCTS.filter((product) =>
+    product.name.toLowerCase().includes(productName.toLowerCase())
+  ).slice(0, 5);
   const [category, setCategory] = useState<Category>(CATEGORIES[0]);
   const [reason, setReason] = useState("");
-  const [priority, setPriority] = useState<Priority>("medium");
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -24,12 +27,11 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
       productName: trimmedName,
       category,
       reason: reason.trim() || "재고 부족",
-      priority,
+      priority: "medium",
     });
 
     setProductName("");
     setReason("");
-    setPriority("medium");
   };
 
   return (
@@ -47,6 +49,22 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
             placeholder="예: 코카콜라 500ml"
             required
           />
+          {productName && (
+  <div>
+   {filteredProducts.map((product) => (
+  <button
+    key={product.name}
+    type="button"
+    onClick={() => {
+      setProductName(product.name);
+      setCategory(product.category as Category);
+    }}
+  >
+    {product.name}
+  </button>
+))}
+</div>
+)}
         </label>
 
         <label className="field">
@@ -71,18 +89,6 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
             onChange={(e) => setReason(e.target.value)}
             placeholder="예: 2칸 비어 있음"
           />
-        </label>
-
-        <label className="field">
-          <span>우선순위</span>
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value as Priority)}
-          >
-            <option value="high">긴급 — 거의 없음</option>
-            <option value="medium">보통 — 조금 부족</option>
-            <option value="low">낮음 — 정리 필요</option>
-          </select>
         </label>
 
         <button type="submit" className="primary-btn">
