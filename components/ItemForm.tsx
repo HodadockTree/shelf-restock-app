@@ -15,7 +15,6 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
     product.name.toLowerCase().includes(productName.toLowerCase())
   ).slice(0, 5);
   const [category, setCategory] = useState<Category>(CATEGORIES[0]);
-  const [reason, setReason] = useState("");
   const [quantity, setQuantity] = useState(1);
 
   const handleSubmit = (event: FormEvent) => {
@@ -27,13 +26,10 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
     onAdd({
       productName: trimmedName,
       category,
-      reason: reason.trim() || "재고 부족",
-      priority: "medium",
       quantity,
     });
 
     setProductName("");
-    setReason("");
     setQuantity(1);
   };
 
@@ -103,17 +99,6 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
             ))}
           </select>
         </label>
-
-        <label className="field">
-          <span>메모 (선택)</span>
-          <input
-            type="text"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="예: 2칸 비어 있음"
-          />
-        </label>
-
         <button type="submit" className="primary-btn">
           체크리스트에 추가
         </button>

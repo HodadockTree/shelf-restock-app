@@ -12,12 +12,6 @@ type RestockChecklistProps = {
   onReset: () => void;
 };
 
-const priorityLabel = {
-  high: "긴급",
-  medium: "보통",
-  low: "낮음",
-};
-
 export default function RestockChecklist({
   items,
   onToggle,
@@ -99,17 +93,11 @@ export default function RestockChecklist({
                           aria-label={`${item.productName} 완료`}
                         />
                         <div className="checklist-body">
-                          <div className="checklist-top">
+                        <div className="checklist-top">
                           <strong className="product-name">
-                            {item.productName} x{item.quantity}
+                          {item.productName} {" × "} {item.quantity}
                           </strong>
-                            <span className={`badge badge--${item.priority}`}>
-                              {priorityLabel[item.priority]}
-                            </span>
-                          </div>
-                          {item.reason && (
-                          <p className="reason-text">{item.reason}</p>
-                        )}
+                        </div>
 
                         <label>
                           <input
@@ -118,7 +106,7 @@ export default function RestockChecklist({
                             onChange={() => onToggleOutOfStock(item.id)}
                           />
                           창고 없음
-                       </label>
+                        </label>
 
                         </div>
                       </label>
