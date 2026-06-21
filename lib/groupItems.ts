@@ -1,5 +1,5 @@
 import { CATEGORIES } from "./categories";
-import type { Priority, RestockItem } from "./types";
+import type { RestockItem } from "./types";
 
 export type CategoryGroup = {
   category: string;
@@ -7,16 +7,11 @@ export type CategoryGroup = {
   completedCount: number;
 };
 
-const priorityOrder: Record<Priority, number> = {
-  high: 0,
-  medium: 1,
-  low: 2,
-};
-
 function sortItems(items: RestockItem[]): RestockItem[] {
   return [...items].sort((a, b) => {
     if (a.checked !== b.checked) return a.checked ? 1 : -1;
-    return priorityOrder[a.priority] - priorityOrder[b.priority];
+    
+    return 0;
   });
 }
 
