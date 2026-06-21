@@ -7,6 +7,8 @@ export type RestockItem = {
   reason: string;
   priority: Priority;
   checked: boolean;
+  quantity: number;
+  outOfStock: boolean;
 };
 
 export type NewRestockItem = {
@@ -14,4 +16,5 @@ export type NewRestockItem = {
   category: string;
   reason: string;
   priority: Priority;
+  quantity: number;
 };

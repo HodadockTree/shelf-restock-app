@@ -6,6 +6,7 @@ import type { RestockItem } from "@/lib/types";
 type RestockChecklistProps = {
   items: RestockItem[];
   onToggle: (id: string) => void;
+  onToggleOutOfStock: (id: string) => void;
   onDelete: (id: string) => void;
   onClearCompleted: () => void;
   onReset: () => void;
@@ -20,6 +21,7 @@ const priorityLabel = {
 export default function RestockChecklist({
   items,
   onToggle,
+  onToggleOutOfStock,
   onDelete,
   onClearCompleted,
   onReset,
@@ -98,14 +100,26 @@ export default function RestockChecklist({
                         />
                         <div className="checklist-body">
                           <div className="checklist-top">
-                            <strong className="product-name">{item.productName}</strong>
+                          <strong className="product-name">
+                            {item.productName} x{item.quantity}
+                          </strong>
                             <span className={`badge badge--${item.priority}`}>
                               {priorityLabel[item.priority]}
                             </span>
                           </div>
                           {item.reason && (
-                            <p className="reason-text">{item.reason}</p>
-                          )}
+                          <p className="reason-text">{item.reason}</p>
+                        )}
+
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={item.outOfStock}
+                            onChange={() => onToggleOutOfStock(item.id)}
+                          />
+                          창고 없음
+                       </label>
+
                         </div>
                       </label>
                       <button

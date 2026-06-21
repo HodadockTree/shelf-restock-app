@@ -16,6 +16,7 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
   ).slice(0, 5);
   const [category, setCategory] = useState<Category>(CATEGORIES[0]);
   const [reason, setReason] = useState("");
+  const [quantity, setQuantity] = useState(1);
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
@@ -28,10 +29,12 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
       category,
       reason: reason.trim() || "재고 부족",
       priority: "medium",
+      quantity,
     });
 
     setProductName("");
     setReason("");
+    setQuantity(1);
   };
 
   return (
@@ -66,7 +69,27 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
 </div>
 )}
         </label>
+<label className="field">
+  <span>수량</span>
 
+  <div>
+    <button
+      type="button"
+      onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+    >
+      -
+    </button>
+
+    <span>{quantity}</span>
+
+    <button
+      type="button"
+      onClick={() => setQuantity((prev) => prev + 1)}
+    >
+      +
+    </button>
+  </div>
+</label>
         <label className="field">
           <span>카테고리</span>
           <select

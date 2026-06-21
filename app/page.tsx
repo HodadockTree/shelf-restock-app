@@ -24,6 +24,7 @@ export default function Home() {
     ...input,
     id: Date.now().toString(),
     checked: false,
+    outOfStock: false,
   };
     setItems((prev) => [item, ...prev]);
   };
@@ -31,6 +32,16 @@ export default function Home() {
   const toggleItem = (id: string) => {
     setItems((prev) =>
       prev.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item))
+    );
+  };
+
+  const toggleOutOfStock = (id: string) => {
+    setItems((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? { ...item, outOfStock: !item.outOfStock }
+          : item
+      )
     );
   };
 
@@ -72,6 +83,7 @@ export default function Home() {
       <RestockChecklist
         items={items}
         onToggle={toggleItem}
+        onToggleOutOfStock={toggleOutOfStock}
         onDelete={deleteItem}
         onClearCompleted={clearCompleted}
         onReset={resetAll}
