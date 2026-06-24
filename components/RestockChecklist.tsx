@@ -20,10 +20,29 @@ export default function RestockChecklist({
   onClearCompleted,
   onReset,
 }: RestockChecklistProps) {
-  const checkedCount = items.filter((item) => item.checked).length;
-  const totalCount = items.length;
-  const progress = totalCount > 0 ? Math.round((checkedCount / totalCount) * 100) : 0;
-  const groups = groupItemsByCategory(items);
+  const activeGroups = groupItemsByCategory(
+    items.filter((item) => !item.outOfStock)
+  );
+  
+  const outOfStockGroups = groupItemsByCategory(
+    items.filter((item) => item.outOfStock)
+  );
+  
+  const checkedCount =
+    activeGroups
+      .flatMap((group) => group.items)
+      .filter((item) => item.checked)
+      .length;
+  
+  const totalCount =
+    activeGroups
+      .flatMap((group) => group.items)
+      .length;
+  
+  const progress =
+    totalCount > 0
+      ? Math.round((checkedCount / totalCount) * 100)
+      : 0;
 
   return (
     <section className="card checklist-card">
@@ -69,8 +88,11 @@ export default function RestockChecklist({
         <p className="empty-state">아직 항목이 없습니다. 위에서 상품을 추가해 보세요.</p>
       ) : (
         <div className="category-groups">
-          {groups.map((group) => (
-            <section key={group.category} className="category-group">
+          {activeGroups.map((group) => (
+            <section
+              key={group.category}
+              className="category-group"
+            >
               <header className="category-group-header">
                 <h3 className="category-group-title">{group.category}</h3>
                 <span className="category-group-count">
@@ -92,6 +114,7 @@ export default function RestockChecklist({
                           onChange={() => onToggle(item.id)}
                           aria-label={`${item.productName} 완료`}
                         />
+
                         <div className="checklist-body">
                         <div className="checklist-top">
                           <strong className="product-name">
@@ -124,6 +147,31 @@ export default function RestockChecklist({
               </ul>
             </section>
           ))}
+          {outOfStockGroups.length > 0 && (
+  <section className="category-group">
+    <header className="category-group-header">
+      <h3 className="category-group-title">
+        창고 없음
+      </h3>
+    </header>
+
+    <ul className="checklist">
+  {outOfStockGroups
+    .flatMap((group) => group.items)
+    .map((item) => (
+      <li key={item.id}>
+        <div className="checklist-item checklist-item--done">
+          <div className="checklist-body">
+            <strong className="product-name">
+              {item.productName}
+            </strong>
+          </div>
+        </div>
+      </li>
+    ))}
+</ul>
+</section>
+  )}
         </div>
       )}
     </section>

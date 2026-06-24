@@ -12,3 +12,8 @@ export type NewRestockItem = {
   category: string;
   quantity: number;
 };
+
+export type UnresolvedItem = {
+  productName: string;
+  category: string;
+};

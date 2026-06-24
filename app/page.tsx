@@ -1,23 +1,47 @@
 "use client";
 
+import UnresolvedItems from "@/components/UnresolvedItems";
 import { useEffect, useState } from "react";
 import ItemForm from "@/components/ItemForm";
 import RestockChecklist from "@/components/RestockChecklist";
-import { loadItems, saveItems } from "@/lib/storage";
-import type { NewRestockItem, RestockItem } from "@/lib/types";
+import {
+  loadItems,
+  saveItems,
+  loadUnresolvedItems,
+  saveUnresolvedItems,
+} from "@/lib/storage";
+
+import type {
+  NewRestockItem,
+  RestockItem,
+  UnresolvedItem,
+} from "@/lib/types";
 
 export default function Home() {
-  const [items, setItems] = useState<RestockItem[]>([]);
-  const [ready, setReady] = useState(false);
+const [items, setItems] =
+  useState<RestockItem[]>([]);
+
+const [unresolvedItems, setUnresolvedItems] =
+  useState<UnresolvedItem[]>([]);
+
+const [ready, setReady] =
+  useState(false);
 
   useEffect(() => {
     setItems(loadItems());
+    setUnresolvedItems(
+      loadUnresolvedItems()
+    );
     setReady(true);
   }, []);
 
   useEffect(() => {
-    if (ready) saveItems(items);
-  }, [items, ready]);
+    if (ready) {
+      saveUnresolvedItems(
+        unresolvedItems
+      );
+    }
+  }, [unresolvedItems, ready]);
 
   const addItem = (input: NewRestockItem) => {
   const item: RestockItem = {
@@ -37,10 +61,67 @@ export default function Home() {
 
   const toggleOutOfStock = (id: string) => {
     setItems((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, outOfStock: !item.outOfStock }
-          : item
+      prev.map((item) => {
+        if (item.id !== id) return item;
+  
+        const nextOutOfStock = !item.outOfStock;
+  
+        if (nextOutOfStock) {
+          setUnresolvedItems((current) => {
+            const exists = current.some(
+              (u) => u.productName === item.productName
+            );
+  
+            if (exists) return current;
+  
+            return [
+              ...current,
+              {
+                productName: item.productName,
+                category: item.category,
+              },
+            ];
+          });
+        }
+  
+        return {
+          ...item,
+          outOfStock: nextOutOfStock,
+          checked: nextOutOfStock,
+        };
+      })
+    );
+  };
+
+  const addUnresolvedItem = (
+    item: UnresolvedItem
+  ) => {
+    const newItem: RestockItem = {
+      id: Date.now().toString(),
+      productName: item.productName,
+      category: item.category,
+      quantity: 1,
+      checked: false,
+      outOfStock: false,
+    };
+  
+    setItems((prev) => [newItem, ...prev]);
+  
+    setUnresolvedItems((prev) =>
+      prev.filter(
+        (target) =>
+          target.productName !== item.productName
+      )
+    );
+  };
+  
+  const deleteUnresolvedItem = (
+    productName: string
+  ) => {
+    setUnresolvedItems((prev) =>
+      prev.filter(
+        (item) =>
+          item.productName !== productName
       )
     );
   };
@@ -79,6 +160,12 @@ export default function Home() {
       </header>
 
       <ItemForm onAdd={addItem} />
+
+      <UnresolvedItems
+        items={unresolvedItems}
+        onAdd={addUnresolvedItem}
+        onDelete={deleteUnresolvedItem}
+      />
 
       <RestockChecklist
         items={items}
