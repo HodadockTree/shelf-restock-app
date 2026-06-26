@@ -1,3 +1,7 @@
+import {
+  loadUserProducts,
+  saveUserProducts,
+} from "./storage";
 export const PRODUCTS = [
   // 라면
   {
@@ -251,3 +255,46 @@ export const PRODUCTS = [
     category: "과자",
   },
 ];
+export function getAllProducts() {
+  return [
+    ...PRODUCTS,
+    ...loadUserProducts(),
+  ];
+}
+
+export function searchProducts(keyword: string) {
+  return getAllProducts()
+    .filter((product) =>
+      product.name
+        .toLowerCase()
+        .includes(keyword.toLowerCase())
+    )
+    .slice(0, 5);
+}
+
+export function addUserProduct(
+  name: string,
+  category: string
+) {
+  const userProducts = loadUserProducts();
+
+  const existsInDefault = PRODUCTS.some(
+    (product) => product.name === name
+  );
+
+  const existsInUser = userProducts.some(
+    (product) => product.name === name
+  );
+
+  if (!existsInDefault && !existsInUser) {
+    saveUserProducts([
+      ...userProducts,
+      {
+        name,
+        category,
+        createdAt: Date.now(),
+      },
+    ]);
+  }
+}
+

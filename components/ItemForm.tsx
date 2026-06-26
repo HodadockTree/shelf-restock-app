@@ -1,6 +1,9 @@
 "use client";
 
-import { PRODUCTS } from "@/lib/products";
+import {
+  searchProducts,
+  addUserProduct,
+} from "@/lib/products";
 import { FormEvent, useState } from "react";
 import { CATEGORIES, type Category } from "@/lib/categories";
 import type { NewRestockItem } from "@/lib/types";
@@ -11,9 +14,8 @@ type ItemFormProps = {
 
 export default function ItemForm({ onAdd }: ItemFormProps) {
   const [productName, setProductName] = useState("");
-  const filteredProducts = PRODUCTS.filter((product) =>
-    product.name.toLowerCase().includes(productName.toLowerCase())
-  ).slice(0, 5);
+  const filteredProducts =
+  searchProducts(productName);
   const [category, setCategory] = useState<Category>(CATEGORIES[0]);
   const [quantity, setQuantity] = useState(1);
 
@@ -21,7 +23,13 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
     event.preventDefault();
 
     const trimmedName = productName.trim();
+
     if (!trimmedName) return;
+    
+    addUserProduct(
+      trimmedName,
+      category
+    );
 
     onAdd({
       productName: trimmedName,
