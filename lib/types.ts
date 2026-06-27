@@ -19,6 +19,7 @@ export type UnresolvedItem = {
 };
 
 export type UserProduct = {
+  id: string;
   name: string;
   category: string;
   createdAt: number;

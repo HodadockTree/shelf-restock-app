@@ -67,14 +67,43 @@ export function loadUserProducts(): UserProduct[] {
 
     if (!raw) return [];
 
-    const parsed = JSON.parse(raw) as UserProduct[];
-
-return Array.isArray(parsed)
-  ? parsed
-  : [];
+    const parsed = JSON.parse(raw);
+    
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    
+    return migrateUserProducts(parsed);
   } catch {
     return [];
   }
+}
+
+type LegacyUserProduct = Omit<UserProduct, "id">;
+
+function migrateUserProducts(
+  products: Array<UserProduct | LegacyUserProduct>
+): UserProduct[] {
+  let migrated = false;
+
+  const result = products.map((product) => {
+    if ("id" in product) {
+      return product;
+    }
+
+    migrated = true;
+
+    return {
+      ...product,
+      id: crypto.randomUUID(),
+    };
+  });
+
+  if (migrated) {
+    saveUserProducts(result);
+  }
+
+  return result;
 }
 
 export function saveUserProducts(

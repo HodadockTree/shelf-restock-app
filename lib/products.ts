@@ -290,6 +290,7 @@ export function addUserProduct(
     saveUserProducts([
       ...userProducts,
       {
+        id: crypto.randomUUID(),
         name,
         category,
         createdAt: Date.now(),
