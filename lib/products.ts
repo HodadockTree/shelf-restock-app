@@ -272,6 +272,64 @@ export function searchProducts(keyword: string) {
     .slice(0, 5);
 }
 
+export function getUserProducts() {
+  return loadUserProducts();
+}
+
+export function searchUserProducts(
+  keyword: string
+) {
+  return getUserProducts().filter((product) =>
+    product.name
+      .toLowerCase()
+      .includes(keyword.toLowerCase())
+  );
+}
+
+export function isDuplicateProduct(
+  name: string,
+  excludeId?: string
+) {
+  return getUserProducts().some(
+    (product) =>
+      product.name === name &&
+      product.id !== excludeId
+  );
+}
+
+export function updateUserProduct(
+  id: string,
+  data: {
+    name: string;
+    category: string;
+  }
+) {
+  const userProducts = getUserProducts();
+
+  const updatedProducts = userProducts.map((product) =>
+    product.id === id
+      ? {
+          ...product,
+          ...data,
+        }
+      : product
+  );
+
+  saveUserProducts(updatedProducts);
+}
+
+export function deleteUserProduct(
+  id: string
+) {
+  const userProducts = getUserProducts();
+
+  const filteredProducts = userProducts.filter(
+    (product) => product.id !== id
+  );
+
+  saveUserProducts(filteredProducts);
+}
+
 export function addUserProduct(
   name: string,
   category: string
