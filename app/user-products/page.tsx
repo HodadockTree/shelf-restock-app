@@ -72,14 +72,22 @@ export default function UserProductsPage() {
 </section>
 
 <section className="user-products-list">
-  {products.map((product) => (
+{products.length === 0 ? (
+  <p className="empty-state">
+    {keyword.trim()
+      ? "검색 결과가 없습니다."
+      : "등록된 사용자 상품이 없습니다."}
+  </p>
+) : (
+  products.map((product) => (
     <UserProductCard
-    key={product.id}
-    product={product}
-    onEdit={handleEdit}
-    onDelete={handleDelete}
-  />
-  ))}
+      key={product.id}
+      product={product}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+    />
+  ))
+)}
 </section>
     </main>
   );
