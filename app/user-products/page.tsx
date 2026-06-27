@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
+    deleteUserProduct,
     getUserProducts,
     searchUserProducts,
   } from "@/lib/products";
@@ -19,19 +20,24 @@ export default function UserProductsPage() {
       setProducts(getUserProducts());
     }, []);
 
-    function handleSearch(
-        keyword: string
+    function refreshProducts(
+        nextKeyword = keyword
       ) {
-        setKeyword(keyword);
-      
-        if (!keyword.trim()) {
+        if (!nextKeyword.trim()) {
           setProducts(getUserProducts());
           return;
         }
       
         setProducts(
-          searchUserProducts(keyword)
+          searchUserProducts(nextKeyword)
         );
+      }
+
+    function handleSearch(
+        keyword: string
+      ) {
+        setKeyword(keyword);
+        refreshProducts(keyword);
       }
 
       function handleEdit(product: UserProduct) {
@@ -39,7 +45,14 @@ export default function UserProductsPage() {
       }
       
       function handleDelete(product: UserProduct) {
-        console.log("삭제", product);
+        const confirmed = window.confirm(
+          "정말 삭제하시겠습니까?"
+        );
+
+        if (!confirmed) return;
+
+        deleteUserProduct(product.id);
+        refreshProducts();
       }
   
     return (
