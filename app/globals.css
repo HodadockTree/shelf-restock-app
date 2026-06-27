@@ -424,3 +424,23 @@ select {
   background: #fee2e2;
   color: var(--danger);
 }
+
+.user-products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-product-title {
+  margin-bottom: 8px;
+}
+
+.user-product-category {
+  color: #666;
+  margin-bottom: 16px;
+}
+
+.user-product-actions {
+  display: flex;
+  gap: 8px;
+}
