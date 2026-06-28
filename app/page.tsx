@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import UnresolvedItems from "@/components/UnresolvedItems";
 import { useEffect, useState } from "react";
 import ItemForm from "@/components/ItemForm";
@@ -157,6 +158,19 @@ const [ready, setReady] =
         <p className="hero-desc">
           매대를 돌며 필요한 상품을 적고, 보충할 때마다 체크하세요. 목록은 이 기기에 저장됩니다.
         </p>
+
+        <Link
+          href="/user-products"
+          className="text-btn"
+          style={{
+            display: "inline-flex",
+            marginTop: "14px",
+            minHeight: "44px",
+            alignItems: "center",
+          }}
+        >
+          상품 관리
+        </Link>
       </header>
 
       <ItemForm onAdd={addItem} />
