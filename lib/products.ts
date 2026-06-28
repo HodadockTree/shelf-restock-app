@@ -262,13 +262,31 @@ export function getAllProducts() {
   ];
 }
 
+function normalizeProductName(name: string) {
+  return name.trim().toLowerCase();
+}
+
 export function searchProducts(keyword: string) {
+  const seenNames = new Set<string>();
+
   return getAllProducts()
     .filter((product) =>
       product.name
         .toLowerCase()
         .includes(keyword.toLowerCase())
     )
+    .filter((product) => {
+      const normalizedName = normalizeProductName(
+        product.name
+      );
+
+      if (seenNames.has(normalizedName)) {
+        return false;
+      }
+
+      seenNames.add(normalizedName);
+      return true;
+    })
     .slice(0, 5);
 }
 
@@ -290,9 +308,18 @@ export function isDuplicateProduct(
   name: string,
   excludeId?: string
 ) {
+  const normalizedName = normalizeProductName(name);
+
+  const existsInDefault = PRODUCTS.some(
+    (product) =>
+      normalizeProductName(product.name) === normalizedName
+  );
+
+  if (existsInDefault) return true;
+
   return getUserProducts().some(
     (product) =>
-      product.name === name &&
+      normalizeProductName(product.name) === normalizedName &&
       product.id !== excludeId
   );
 }

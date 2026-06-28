@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import {
     deleteUserProduct,
     getUserProducts,
+    isDuplicateProduct,
     searchUserProducts,
+    updateUserProduct,
   } from "@/lib/products";
+import { CATEGORIES } from "@/lib/categories";
 import UserProductCard from "@/components/UserProductCard";
 import type { UserProduct } from "@/lib/types";
 
@@ -15,6 +18,17 @@ export default function UserProductsPage() {
 
     const [keyword, setKeyword] =
         useState("");
+
+    const [editingProductId, setEditingProductId] =
+        useState<string | null>(null);
+
+    const [editName, setEditName] =
+        useState("");
+
+    const [editCategory, setEditCategory] =
+        useState<(typeof CATEGORIES)[number]>(
+          CATEGORIES[0]
+        );
   
     useEffect(() => {
       setProducts(getUserProducts());
@@ -41,7 +55,44 @@ export default function UserProductsPage() {
       }
 
       function handleEdit(product: UserProduct) {
-        console.log("수정", product);
+        setEditingProductId(product.id);
+        setEditName(product.name);
+        setEditCategory(
+          product.category as (typeof CATEGORIES)[number]
+        );
+      }
+
+      function handleCancelEdit() {
+        setEditingProductId(null);
+        setEditName("");
+        setEditCategory(CATEGORIES[0]);
+      }
+
+      function handleSaveEdit(product: UserProduct) {
+        const trimmedName = editName.trim();
+
+        if (!trimmedName) {
+          window.alert("상품명을 입력해주세요.");
+          return;
+        }
+
+        if (
+          isDuplicateProduct(
+            trimmedName,
+            product.id
+          )
+        ) {
+          window.alert("이미 등록된 상품명입니다.");
+          return;
+        }
+
+        updateUserProduct(product.id, {
+          name: trimmedName,
+          category: editCategory,
+        });
+
+        handleCancelEdit();
+        refreshProducts();
       }
       
       function handleDelete(product: UserProduct) {
@@ -52,6 +103,11 @@ export default function UserProductsPage() {
         if (!confirmed) return;
 
         deleteUserProduct(product.id);
+
+        if (editingProductId === product.id) {
+          handleCancelEdit();
+        }
+
         refreshProducts();
       }
   
@@ -93,12 +149,69 @@ export default function UserProductsPage() {
   </p>
 ) : (
   products.map((product) => (
-    <UserProductCard
-      key={product.id}
-      product={product}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-    />
+    <div key={product.id}>
+      <UserProductCard
+        product={product}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+
+      {editingProductId === product.id && (
+        <section className="card">
+          <label className="field">
+            <span>상품명</span>
+
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) =>
+                setEditName(e.target.value)
+              }
+            />
+          </label>
+
+          <label className="field">
+            <span>카테고리</span>
+
+            <select
+              value={editCategory}
+              onChange={(e) =>
+                setEditCategory(
+                  e.target.value as (typeof CATEGORIES)[number]
+                )
+              }
+            >
+              {CATEGORIES.map((category) => (
+                <option
+                  key={category}
+                  value={category}
+                >
+                  {category}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <div className="user-product-actions">
+            <button
+              type="button"
+              onClick={() =>
+                handleSaveEdit(product)
+              }
+            >
+              저장
+            </button>
+
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+            >
+              취소
+            </button>
+          </div>
+        </section>
+      )}
+    </div>
   ))
 )}
 </section>
