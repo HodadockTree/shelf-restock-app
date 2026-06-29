@@ -17,12 +17,23 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
   const filteredProducts =
   searchProducts(productName);
   const [category, setCategory] = useState<Category>(CATEGORIES[0]);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState("1");
+
+  const normalizeQuantity = (value: string) => {
+    const parsed = Number(value);
+
+    if (!Number.isFinite(parsed) || parsed < 1) {
+      return 1;
+    }
+
+    return Math.floor(parsed);
+  };
 
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
 
     const trimmedName = productName.trim();
+    const normalizedQuantity = normalizeQuantity(quantity);
 
     if (!trimmedName) return;
     
@@ -34,11 +45,11 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
     onAdd({
       productName: trimmedName,
       category,
-      quantity,
+      quantity: normalizedQuantity,
     });
 
     setProductName("");
-    setQuantity(1);
+    setQuantity("1");
   };
 
   return (
@@ -53,21 +64,27 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
             type="text"
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
-            placeholder="예: 코카콜라 500ml"
+            placeholder="예: 새우깡"
             required
           />
           {productName && (
-  <div>
+  <div className="autocomplete-list">
    {filteredProducts.map((product) => (
   <button
     key={product.name}
     type="button"
+    className="autocomplete-item"
     onClick={() => {
       setProductName(product.name);
       setCategory(product.category as Category);
     }}
   >
-    {product.name}
+    <span className="autocomplete-name">
+      {product.name}
+    </span>
+    <span className="autocomplete-category">
+      {product.category}
+    </span>
   </button>
 ))}
 </div>
@@ -76,19 +93,45 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
 <label className="field">
   <span>수량</span>
 
-  <div>
+  <div className="quantity-stepper">
     <button
       type="button"
-      onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
+      className="quantity-stepper-btn"
+      onClick={() =>
+        setQuantity((prev) =>
+          String(Math.max(1, normalizeQuantity(prev) - 1))
+        )
+      }
     >
       -
     </button>
 
-    <span>{quantity}</span>
+    <input
+      type="number"
+      className="quantity-stepper-value"
+      min="1"
+      step="1"
+      inputMode="numeric"
+      value={quantity}
+      onChange={(event) =>
+        setQuantity(event.target.value)
+      }
+      onBlur={() =>
+        setQuantity((prev) =>
+          String(normalizeQuantity(prev))
+        )
+      }
+      aria-label="수량"
+    />
 
     <button
       type="button"
-      onClick={() => setQuantity((prev) => prev + 1)}
+      className="quantity-stepper-btn"
+      onClick={() =>
+        setQuantity((prev) =>
+          String(normalizeQuantity(prev) + 1)
+        )
+      }
     >
       +
     </button>

@@ -1,13 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import UnresolvedItems from "@/components/UnresolvedItems";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ItemForm from "@/components/ItemForm";
+import PreviousChecklist from "@/components/PreviousChecklist";
 import RestockChecklist from "@/components/RestockChecklist";
 import {
   loadItems,
   saveItems,
+  clearPreviousChecklist,
+  loadPreviousChecklist,
+  savePreviousChecklist,
   loadUnresolvedItems,
   saveUnresolvedItems,
 } from "@/lib/storage";
@@ -25,11 +28,21 @@ const [items, setItems] =
 const [unresolvedItems, setUnresolvedItems] =
   useState<UnresolvedItem[]>([]);
 
+const [previousItems, setPreviousItems] =
+  useState<RestockItem[]>([]);
+
 const [ready, setReady] =
   useState(false);
 
+const itemsRef = useRef<RestockItem[]>([]);
+
   useEffect(() => {
-    setItems(loadItems());
+    const savedItems = loadItems();
+    setItems(savedItems);
+    itemsRef.current = savedItems;
+    setPreviousItems(
+      loadPreviousChecklist()
+    );
     setUnresolvedItems(
       loadUnresolvedItems()
     );
@@ -40,6 +53,7 @@ const [ready, setReady] =
     if (ready) {
       saveItems(items);
     }
+    itemsRef.current = items;
   }, [items, ready]);
 
   useEffect(() => {
@@ -137,6 +151,152 @@ const [ready, setReady] =
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
+  const createRestoredItem = (
+    item: RestockItem
+  ): RestockItem => ({
+    ...item,
+    id: crypto.randomUUID(),
+    checked: false,
+    outOfStock: false,
+  });
+
+  const getItemProductName = (
+    item: RestockItem
+  ) => {
+    const legacyItem = item as RestockItem & {
+      name?: string;
+      title?: string;
+    };
+
+    return (
+      legacyItem.productName ??
+      legacyItem.name ??
+      legacyItem.title ??
+      ""
+    );
+  };
+
+  const normalizeProductName = (name: string) =>
+    name
+      .normalize("NFKC")
+      .trim()
+      .replace(/\s+/g, " ")
+      .toLowerCase();
+
+  const addPreviousItems = (
+    targets: RestockItem[]
+  ) => {
+    const existingNames = new Set(
+      itemsRef.current.map((item) =>
+        normalizeProductName(
+          getItemProductName(item)
+        )
+      )
+    );
+
+    const restoredItems = targets
+      .filter((item) => {
+        const normalizedName = normalizeProductName(
+          getItemProductName(item)
+        );
+
+        if (
+          !normalizedName ||
+          existingNames.has(normalizedName)
+        ) {
+          return false;
+        }
+
+        existingNames.add(normalizedName);
+        return true;
+      })
+      .map(createRestoredItem);
+
+    if (restoredItems.length > 0) {
+      setItems((prev) => {
+        const existingPrevNames = new Set(
+          prev.map((item) =>
+            normalizeProductName(
+              getItemProductName(item)
+            )
+          )
+        );
+
+        const finalRestoredItems = restoredItems.filter(
+          (item) => {
+            const normalizedName = normalizeProductName(
+              getItemProductName(item)
+            );
+
+            if (
+              !normalizedName ||
+              existingPrevNames.has(normalizedName)
+            ) {
+              return false;
+            }
+
+            existingPrevNames.add(normalizedName);
+            return true;
+          }
+        );
+
+        const nextItems = [
+          ...finalRestoredItems,
+          ...prev,
+        ];
+
+        itemsRef.current = nextItems;
+
+        return nextItems;
+      });
+    }
+
+    return {
+      addedCount: restoredItems.length,
+      skippedCount:
+        targets.length - restoredItems.length,
+    };
+  };
+
+  const loadAllPreviousItems = () => {
+    return addPreviousItems(previousItems);
+  };
+
+  const loadSelectedPreviousItems = (
+    ids: string[]
+  ) => {
+    const selectedIdSet = new Set(ids);
+    return addPreviousItems(
+      previousItems.filter((item) =>
+        selectedIdSet.has(item.id)
+      )
+    );
+  };
+
+  const saveCurrentAsPrevious = () => {
+    savePreviousChecklist(items);
+    setPreviousItems(items);
+  };
+
+  const deletePreviousChecklist = () => {
+    clearPreviousChecklist();
+    setPreviousItems([]);
+  };
+
+  const deletePreviousChecklistItem = (
+    id: string
+  ) => {
+    setPreviousItems((prev) => {
+      const nextItems = prev.filter(
+        (item) => item.id !== id
+      );
+
+      savePreviousChecklist(nextItems);
+
+      return nextItems;
+    });
+  };
+
   const clearCompleted = () => {
     setItems((prev) => prev.filter((item) => !item.checked));
   };
@@ -181,10 +341,12 @@ const [ready, setReady] =
 
       <ItemForm onAdd={addItem} />
 
-      <UnresolvedItems
-        items={unresolvedItems}
-        onAdd={addUnresolvedItem}
-        onDelete={deleteUnresolvedItem}
+      <PreviousChecklist
+        items={previousItems}
+        onLoadAll={loadAllPreviousItems}
+        onLoadSelected={loadSelectedPreviousItems}
+        onDeletePrevious={deletePreviousChecklist}
+        onDeleteItem={deletePreviousChecklistItem}
       />
 
       <RestockChecklist
@@ -192,6 +354,7 @@ const [ready, setReady] =
         onToggle={toggleItem}
         onToggleOutOfStock={toggleOutOfStock}
         onDelete={deleteItem}
+        onSaveCurrent={saveCurrentAsPrevious}
         onClearCompleted={clearCompleted}
         onReset={resetAll}
       />

@@ -8,6 +8,7 @@ type RestockChecklistProps = {
   onToggle: (id: string) => void;
   onToggleOutOfStock: (id: string) => void;
   onDelete: (id: string) => void;
+  onSaveCurrent: () => void;
   onClearCompleted: () => void;
   onReset: () => void;
 };
@@ -15,18 +16,12 @@ type RestockChecklistProps = {
 export default function RestockChecklist({
   items,
   onToggle,
-  onToggleOutOfStock,
   onDelete,
+  onSaveCurrent,
   onClearCompleted,
   onReset,
 }: RestockChecklistProps) {
-  const activeGroups = groupItemsByCategory(
-    items.filter((item) => !item.outOfStock)
-  );
-  
-  const outOfStockGroups = groupItemsByCategory(
-    items.filter((item) => item.outOfStock)
-  );
+  const activeGroups = groupItemsByCategory(items);
   
   const checkedCount =
     activeGroups
@@ -54,6 +49,11 @@ export default function RestockChecklist({
           )}
         </div>
         <div className="header-actions">
+          {totalCount > 0 && (
+            <button type="button" className="text-btn" onClick={onSaveCurrent}>
+              현재 목록 저장
+            </button>
+          )}
           {checkedCount > 0 && (
             <button type="button" className="text-btn" onClick={onClearCompleted}>
               완료 삭제
@@ -115,63 +115,33 @@ export default function RestockChecklist({
                           aria-label={`${item.productName} 완료`}
                         />
 
-                        <div className="checklist-body">
-                        <div className="checklist-top">
+                        <span className="checklist-body">
                           <strong className="product-name">
-                          {item.productName} {" × "} {item.quantity}
+                            {item.productName}
                           </strong>
-                        </div>
-
-                        <label>
-                          <input
-                            type="checkbox"
-                            checked={item.outOfStock}
-                            onChange={() => onToggleOutOfStock(item.id)}
-                          />
-                          창고 없음
-                        </label>
-
-                        </div>
+                        </span>
                       </label>
-                      <button
-                        type="button"
-                        className="delete-btn"
-                        onClick={() => onDelete(item.id)}
-                        aria-label={`${item.productName} 삭제`}
-                      >
-                        ✕
-                      </button>
+
+                      <div className="checklist-controls">
+                        <span className="quantity-badge">
+                          × {item.quantity}
+                        </span>
+
+                        <button
+                          type="button"
+                          className="delete-btn"
+                          onClick={() => onDelete(item.id)}
+                          aria-label={`${item.productName} 삭제`}
+                        >
+                          ×
+                        </button>
+                      </div>
                     </div>
                   </li>
                 ))}
               </ul>
             </section>
           ))}
-          {outOfStockGroups.length > 0 && (
-  <section className="category-group">
-    <header className="category-group-header">
-      <h3 className="category-group-title">
-        창고 없음
-      </h3>
-    </header>
-
-    <ul className="checklist">
-  {outOfStockGroups
-    .flatMap((group) => group.items)
-    .map((item) => (
-      <li key={item.id}>
-        <div className="checklist-item checklist-item--done">
-          <div className="checklist-body">
-            <strong className="product-name">
-              {item.productName}
-            </strong>
-          </div>
-        </div>
-      </li>
-    ))}
-</ul>
-</section>
-  )}
         </div>
       )}
     </section>
