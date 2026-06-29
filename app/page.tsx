@@ -38,6 +38,12 @@ const [ready, setReady] =
 
   useEffect(() => {
     if (ready) {
+      saveItems(items);
+    }
+  }, [items, ready]);
+
+  useEffect(() => {
+    if (ready) {
       saveUnresolvedItems(
         unresolvedItems
       );
@@ -192,3 +198,4 @@ const [ready, setReady] =
     </main>
   );
 }
+
