@@ -25,6 +25,13 @@ export type UserProduct = {
   createdAt: number;
 };
 
+export type DisposalMemo = {
+  id: string;
+  imageDataUrl: string;
+  memo: string;
+  createdAt: string;
+};
+
 export type ProductSearchResult = {
   name: string;
   category: string;

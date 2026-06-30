@@ -27,7 +27,8 @@ body {
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -112,7 +113,8 @@ select {
 }
 
 .field input,
-.field select {
+.field select,
+.field textarea {
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -122,9 +124,16 @@ select {
 }
 
 .field input:focus,
-.field select:focus {
+.field select:focus,
+.field textarea:focus {
   outline: 2px solid rgba(37, 99, 235, 0.35);
   border-color: var(--primary);
+}
+
+.field textarea {
+  min-height: 96px;
+  resize: vertical;
+  line-height: 1.45;
 }
 
 .autocomplete-list {
@@ -289,6 +298,11 @@ select {
 
 .primary-btn:active:not(:disabled) {
   transform: scale(0.98);
+}
+
+.primary-btn:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
 }
 
 .checklist-header {
@@ -853,4 +867,82 @@ select {
   color: var(--muted);
   font-size: 0.86rem;
   line-height: 1.4;
+}
+
+.disposal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.disposal-preview {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.disposal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.disposal-item {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) 36px;
+  align-items: start;
+  gap: 10px;
+  min-height: 96px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.disposal-thumb {
+  width: 76px;
+  height: 76px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: #f8fafc;
+}
+
+.disposal-thumb--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed #cbd5e1;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.disposal-body {
+  min-width: 0;
+}
+
+.disposal-memo {
+  margin: 0 0 8px;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
+}
+
+.disposal-memo--empty {
+  color: var(--muted);
+}
+
+.disposal-time {
+  display: block;
+  color: var(--muted);
+  font-size: 0.8rem;
 }

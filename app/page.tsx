@@ -337,6 +337,19 @@ const itemsRef = useRef<RestockItem[]>([]);
         >
           상품 관리
         </Link>
+        <Link
+          href="/disposal-memos"
+          className="text-btn"
+          style={{
+            display: "inline-flex",
+            marginTop: "14px",
+            marginLeft: "16px",
+            minHeight: "44px",
+            alignItems: "center",
+          }}
+        >
+          폐기 메모
+        </Link>
       </header>
 
       <ItemForm onAdd={addItem} />
