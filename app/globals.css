@@ -437,6 +437,10 @@ textarea {
   background: #fff;
 }
 
+.category-group--collapsed .category-group-header {
+  border-bottom: none;
+}
+
 .category-group-header {
   display: flex;
   align-items: center;
@@ -447,11 +451,20 @@ textarea {
   border-bottom: 1px solid var(--border);
 }
 
+.category-group-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .category-group-title {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 700;
   color: #1e40af;
+  overflow-wrap: anywhere;
+  word-break: keep-all;
 }
 
 .category-group-count {
@@ -462,6 +475,24 @@ textarea {
   background: rgba(255, 255, 255, 0.8);
   padding: 4px 10px;
   border-radius: 999px;
+}
+
+.category-toggle-btn {
+  flex-shrink: 0;
+  min-height: 34px;
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0 10px;
+}
+
+.category-toggle-btn:hover {
+  background: #dbeafe;
+  border-color: rgba(37, 99, 235, 0.45);
 }
 
 .category-group .checklist {

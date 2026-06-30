@@ -1,6 +1,7 @@
 "use client";
 
 import { groupItemsByCategory } from "@/lib/groupItems";
+import { matchesSearchKeyword } from "@/lib/search";
 import { useState } from "react";
 import type { RestockItem } from "@/lib/types";
 
@@ -24,12 +25,15 @@ export default function RestockChecklist({
 }: RestockChecklistProps) {
   const activeGroups = groupItemsByCategory(items);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const normalizedSearchKeyword = searchKeyword.trim().toLowerCase();
-  const filteredItems = normalizedSearchKeyword
+  const [collapsedCategories, setCollapsedCategories] =
+    useState<Record<string, boolean>>({});
+  const hasSearchKeyword = searchKeyword.trim().length > 0;
+  const filteredItems = hasSearchKeyword
     ? items.filter((item) =>
-        item.productName
-          .toLowerCase()
-          .includes(normalizedSearchKeyword)
+        matchesSearchKeyword(
+          item.productName,
+          searchKeyword
+        )
       )
     : items;
   const visibleGroups = groupItemsByCategory(filteredItems);
@@ -49,6 +53,13 @@ export default function RestockChecklist({
     totalCount > 0
       ? Math.round((checkedCount / totalCount) * 100)
       : 0;
+
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories((prev) => ({
+      ...prev,
+      [category]: !prev[category],
+    }));
+  };
 
   return (
     <section className="card checklist-card">
@@ -115,19 +126,44 @@ export default function RestockChecklist({
             <p className="empty-state">검색 결과가 없습니다.</p>
           ) : (
             <div className="category-groups">
-              {visibleGroups.map((group) => (
+              {visibleGroups.map((group) => {
+                const isCollapsed =
+                  !hasSearchKeyword &&
+                  collapsedCategories[group.category];
+                const listId = `category-items-${group.category}`;
+
+                return (
                 <section
                   key={group.category}
-                  className="category-group"
+                  className={`category-group ${
+                    isCollapsed
+                      ? "category-group--collapsed"
+                      : ""
+                  }`}
                 >
                   <header className="category-group-header">
-                    <h3 className="category-group-title">{group.category}</h3>
-                    <span className="category-group-count">
-                      {group.completedCount} / {group.items.length}
-                    </span>
+                    <div className="category-group-summary">
+                      <h3 className="category-group-title">{group.category}</h3>
+                      <span className="category-group-count">
+                        {group.completedCount} / {group.items.length}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="category-toggle-btn"
+                      onClick={() =>
+                        toggleCategory(group.category)
+                      }
+                      aria-expanded={!isCollapsed}
+                      aria-controls={listId}
+                    >
+                      {isCollapsed ? "펼치기" : "접기"}
+                    </button>
                   </header>
 
-                  <ul className="checklist">
+                  {!isCollapsed && (
+                  <ul id={listId} className="checklist">
                     {group.items.map((item) => (
                       <li key={item.id}>
                         <div
@@ -167,8 +203,10 @@ export default function RestockChecklist({
                       </li>
                     ))}
                   </ul>
+                  )}
                 </section>
-              ))}
+                );
+              })}
             </div>
           )}
         </>

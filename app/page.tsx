@@ -65,13 +65,45 @@ const itemsRef = useRef<RestockItem[]>([]);
   }, [unresolvedItems, ready]);
 
   const addItem = (input: NewRestockItem) => {
-  const item: RestockItem = {
-    ...input,
-    id: Date.now().toString(),
-    checked: false,
-    outOfStock: false,
-  };
-    setItems((prev) => [item, ...prev]);
+    const normalizedName = normalizeProductName(
+      input.productName
+    );
+
+    if (!normalizedName) return;
+
+    const exists = itemsRef.current.some((item) =>
+      normalizeProductName(
+        getItemProductName(item)
+      ) === normalizedName
+    );
+
+    if (exists) {
+      window.alert("이미 체크리스트에 있는 상품입니다.");
+      return;
+    }
+
+    const item: RestockItem = {
+      ...input,
+      id: Date.now().toString(),
+      checked: false,
+      outOfStock: false,
+    };
+
+    setItems((prev) => {
+      const alreadyExists = prev.some(
+        (currentItem) =>
+          normalizeProductName(
+            getItemProductName(currentItem)
+          ) === normalizedName
+      );
+
+      if (alreadyExists) return prev;
+
+      const nextItems = [item, ...prev];
+      itemsRef.current = nextItems;
+
+      return nextItems;
+    });
   };
 
   const toggleItem = (id: string) => {

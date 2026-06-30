@@ -2,6 +2,7 @@ import {
   loadUserProducts,
   saveUserProducts,
 } from "./storage";
+import { matchesSearchKeyword } from "./search";
 import type { ProductSearchResult } from "./types";
 export const PRODUCTS = [
   // 라면
@@ -278,9 +279,7 @@ export function searchProducts(keyword: string) {
 
   return getAllProducts()
     .filter((product) =>
-      product.name
-        .toLowerCase()
-        .includes(keyword.toLowerCase())
+      matchesSearchKeyword(product.name, keyword)
     )
     .filter((product) => {
       const normalizedName = normalizeProductName(
