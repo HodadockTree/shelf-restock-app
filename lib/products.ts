@@ -2,6 +2,7 @@ import {
   loadUserProducts,
   saveUserProducts,
 } from "./storage";
+import type { ProductSearchResult } from "./types";
 export const PRODUCTS = [
   // 라면
   {
@@ -255,10 +256,16 @@ export const PRODUCTS = [
     category: "과자",
   },
 ];
-export function getAllProducts() {
+export function getAllProducts(): ProductSearchResult[] {
   return [
-    ...PRODUCTS,
-    ...loadUserProducts(),
+    ...PRODUCTS.map((product) => ({
+      ...product,
+      source: "default" as const,
+    })),
+    ...loadUserProducts().map((product) => ({
+      ...product,
+      source: "user" as const,
+    })),
   ];
 }
 

@@ -24,3 +24,9 @@ export type UserProduct = {
   category: string;
   createdAt: number;
 };
+
+export type ProductSearchResult = {
+  name: string;
+  category: string;
+  source: "default" | "user";
+};

@@ -1,6 +1,7 @@
 "use client";
 
 import { groupItemsByCategory } from "@/lib/groupItems";
+import { useState } from "react";
 import type { RestockItem } from "@/lib/types";
 
 type RestockChecklistProps = {
@@ -22,6 +23,16 @@ export default function RestockChecklist({
   onReset,
 }: RestockChecklistProps) {
   const activeGroups = groupItemsByCategory(items);
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const normalizedSearchKeyword = searchKeyword.trim().toLowerCase();
+  const filteredItems = normalizedSearchKeyword
+    ? items.filter((item) =>
+        item.productName
+          .toLowerCase()
+          .includes(normalizedSearchKeyword)
+      )
+    : items;
+  const visibleGroups = groupItemsByCategory(filteredItems);
   
   const checkedCount =
     activeGroups
@@ -87,62 +98,80 @@ export default function RestockChecklist({
       {totalCount === 0 ? (
         <p className="empty-state">아직 항목이 없습니다. 위에서 상품을 추가해 보세요.</p>
       ) : (
-        <div className="category-groups">
-          {activeGroups.map((group) => (
-            <section
-              key={group.category}
-              className="category-group"
-            >
-              <header className="category-group-header">
-                <h3 className="category-group-title">{group.category}</h3>
-                <span className="category-group-count">
-                  {group.completedCount} / {group.items.length}
-                </span>
-              </header>
+        <>
+          <label className="field checklist-search">
+            <span>체크리스트 검색</span>
+            <input
+              type="search"
+              value={searchKeyword}
+              onChange={(event) =>
+                setSearchKeyword(event.target.value)
+              }
+              placeholder="체크리스트에서 찾기"
+            />
+          </label>
 
-              <ul className="checklist">
-                {group.items.map((item) => (
-                  <li key={item.id}>
-                    <div
-                      className={`checklist-item ${item.checked ? "checklist-item--done" : ""}`}
-                    >
-                      <label className="checklist-label">
-                        <input
-                          type="checkbox"
-                          className="checklist-checkbox"
-                          checked={item.checked}
-                          onChange={() => onToggle(item.id)}
-                          aria-label={`${item.productName} 완료`}
-                        />
+          {visibleGroups.length === 0 ? (
+            <p className="empty-state">검색 결과가 없습니다.</p>
+          ) : (
+            <div className="category-groups">
+              {visibleGroups.map((group) => (
+                <section
+                  key={group.category}
+                  className="category-group"
+                >
+                  <header className="category-group-header">
+                    <h3 className="category-group-title">{group.category}</h3>
+                    <span className="category-group-count">
+                      {group.completedCount} / {group.items.length}
+                    </span>
+                  </header>
 
-                        <span className="checklist-body">
-                          <strong className="product-name">
-                            {item.productName}
-                          </strong>
-                        </span>
-                      </label>
-
-                      <div className="checklist-controls">
-                        <span className="quantity-badge">
-                          × {item.quantity}
-                        </span>
-
-                        <button
-                          type="button"
-                          className="delete-btn"
-                          onClick={() => onDelete(item.id)}
-                          aria-label={`${item.productName} 삭제`}
+                  <ul className="checklist">
+                    {group.items.map((item) => (
+                      <li key={item.id}>
+                        <div
+                          className={`checklist-item ${item.checked ? "checklist-item--done" : ""}`}
                         >
-                          ×
-                        </button>
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
+                          <label className="checklist-label">
+                            <input
+                              type="checkbox"
+                              className="checklist-checkbox"
+                              checked={item.checked}
+                              onChange={() => onToggle(item.id)}
+                              aria-label={`${item.productName} 완료`}
+                            />
+
+                            <span className="checklist-body">
+                              <strong className="product-name">
+                                {item.productName}
+                              </strong>
+                            </span>
+                          </label>
+
+                          <div className="checklist-controls">
+                            <span className="quantity-badge">
+                              × {item.quantity}
+                            </span>
+
+                            <button
+                              type="button"
+                              className="delete-btn"
+                              onClick={() => onDelete(item.id)}
+                              aria-label={`${item.productName} 삭제`}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </section>
   );

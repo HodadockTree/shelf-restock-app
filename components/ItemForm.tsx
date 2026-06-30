@@ -4,6 +4,7 @@ import {
   searchProducts,
   addUserProduct,
 } from "@/lib/products";
+import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import { CATEGORIES, type Category } from "@/lib/categories";
 import type { NewRestockItem } from "@/lib/types";
@@ -13,6 +14,7 @@ type ItemFormProps = {
 };
 
 export default function ItemForm({ onAdd }: ItemFormProps) {
+  const router = useRouter();
   const [productName, setProductName] = useState("");
   const filteredProducts =
   searchProducts(productName);
@@ -70,22 +72,40 @@ export default function ItemForm({ onAdd }: ItemFormProps) {
           {productName && (
   <div className="autocomplete-list">
    {filteredProducts.map((product) => (
-  <button
-    key={product.name}
-    type="button"
+  <div
+    key={`${product.source}-${product.name}`}
     className="autocomplete-item"
-    onClick={() => {
-      setProductName(product.name);
-      setCategory(product.category as Category);
-    }}
   >
-    <span className="autocomplete-name">
-      {product.name}
-    </span>
-    <span className="autocomplete-category">
-      {product.category}
-    </span>
-  </button>
+    <button
+      type="button"
+      className="autocomplete-select-btn"
+      onClick={() => {
+        setProductName(product.name);
+        setCategory(product.category as Category);
+      }}
+    >
+      <span className="autocomplete-name">
+        {product.name}
+      </span>
+      <span className="autocomplete-category">
+        {product.category}
+      </span>
+    </button>
+
+    {product.source === "user" && (
+      <button
+        type="button"
+        className="autocomplete-manage-btn"
+        onClick={() => {
+          router.push(
+            `/user-products?keyword=${encodeURIComponent(product.name)}`
+          );
+        }}
+      >
+        관리
+      </button>
+    )}
+  </div>
 ))}
 </div>
 )}

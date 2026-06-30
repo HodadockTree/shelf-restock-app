@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
     deleteUserProduct,
@@ -31,6 +32,19 @@ export default function UserProductsPage() {
         );
   
     useEffect(() => {
+      const initialKeyword = new URLSearchParams(
+        window.location.search
+      ).get("keyword") ?? "";
+
+      setKeyword(initialKeyword);
+
+      if (initialKeyword.trim()) {
+        setProducts(
+          searchUserProducts(initialKeyword)
+        );
+        return;
+      }
+
       setProducts(getUserProducts());
     }, []);
 
@@ -114,9 +128,14 @@ export default function UserProductsPage() {
     return (
       <main className="app">
         <header className="hero">
-  <p className="hero-badge">
-    편의점 보충진열
-  </p>
+  <Link
+    href="/"
+    className="back-icon-btn"
+    aria-label="체크리스트로 돌아가기"
+    title="체크리스트로 돌아가기"
+  >
+    ←
+  </Link>
 
   <h1>사용자 상품 관리</h1>
 
@@ -149,69 +168,19 @@ export default function UserProductsPage() {
   </p>
 ) : (
   products.map((product) => (
-    <div key={product.id}>
-      <UserProductCard
-        product={product}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
-
-      {editingProductId === product.id && (
-        <section className="card">
-          <label className="field">
-            <span>상품명</span>
-
-            <input
-              type="text"
-              value={editName}
-              onChange={(e) =>
-                setEditName(e.target.value)
-              }
-            />
-          </label>
-
-          <label className="field">
-            <span>카테고리</span>
-
-            <select
-              value={editCategory}
-              onChange={(e) =>
-                setEditCategory(
-                  e.target.value as (typeof CATEGORIES)[number]
-                )
-              }
-            >
-              {CATEGORIES.map((category) => (
-                <option
-                  key={category}
-                  value={category}
-                >
-                  {category}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <div className="user-product-actions">
-            <button
-              type="button"
-              onClick={() =>
-                handleSaveEdit(product)
-              }
-            >
-              저장
-            </button>
-
-            <button
-              type="button"
-              onClick={handleCancelEdit}
-            >
-              취소
-            </button>
-          </div>
-        </section>
-      )}
-    </div>
+    <UserProductCard
+      key={product.id}
+      product={product}
+      isEditing={editingProductId === product.id}
+      editName={editName}
+      editCategory={editCategory}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+      onEditNameChange={setEditName}
+      onEditCategoryChange={setEditCategory}
+      onSaveEdit={handleSaveEdit}
+      onCancelEdit={handleCancelEdit}
+    />
   ))
 )}
 </section>
