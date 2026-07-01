@@ -25,6 +25,8 @@ export default function RestockChecklist({
 }: RestockChecklistProps) {
   const activeGroups = groupItemsByCategory(items);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [isCompletedCollapsed, setIsCompletedCollapsed] =
+    useState(true);
   const [collapsedCategories, setCollapsedCategories] =
     useState<Record<string, boolean>>({});
   const hasSearchKeyword = searchKeyword.trim().length > 0;
@@ -36,7 +38,12 @@ export default function RestockChecklist({
         )
       )
     : items;
-  const visibleGroups = groupItemsByCategory(filteredItems);
+  const shouldHideCompleted =
+    !hasSearchKeyword && isCompletedCollapsed;
+  const visibleItems = shouldHideCompleted
+    ? filteredItems.filter((item) => !item.checked)
+    : filteredItems;
+  const visibleGroups = groupItemsByCategory(visibleItems);
   
   const checkedCount =
     activeGroups
@@ -112,18 +119,49 @@ export default function RestockChecklist({
         <>
           <label className="field checklist-search">
             <span>체크리스트 검색</span>
-            <input
-              type="search"
-              value={searchKeyword}
-              onChange={(event) =>
-                setSearchKeyword(event.target.value)
-              }
-              placeholder="체크리스트에서 찾기"
-            />
+            <div className="input-clear-wrap">
+              <input
+                type="search"
+                value={searchKeyword}
+                onChange={(event) =>
+                  setSearchKeyword(event.target.value)
+                }
+                placeholder="체크리스트에서 찾기"
+              />
+              {searchKeyword && (
+                <button
+                  type="button"
+                  className="input-clear-btn"
+                  onClick={() => setSearchKeyword("")}
+                  aria-label="검색어 지우기"
+                >
+                  ×
+                </button>
+              )}
+            </div>
           </label>
 
+          {checkedCount > 0 && !hasSearchKeyword && (
+            <button
+              type="button"
+              className="completed-fold-btn"
+              onClick={() =>
+                setIsCompletedCollapsed((prev) => !prev)
+              }
+              aria-expanded={!isCompletedCollapsed}
+            >
+              {isCompletedCollapsed
+                ? `완료 항목 ${checkedCount}개 접힘`
+                : `완료 항목 ${checkedCount}개 펼쳐짐`}
+            </button>
+          )}
+
           {visibleGroups.length === 0 ? (
-            <p className="empty-state">검색 결과가 없습니다.</p>
+            <p className="empty-state">
+              {hasSearchKeyword
+                ? "검색 결과가 없습니다."
+                : "완료되지 않은 항목이 없습니다."}
+            </p>
           ) : (
             <div className="category-groups">
               {visibleGroups.map((group) => {

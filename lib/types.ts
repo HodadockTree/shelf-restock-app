@@ -33,6 +33,7 @@ export type DisposalMemo = {
 };
 
 export type ProductSearchResult = {
+  id?: string;
   name: string;
   category: string;
   source: "default" | "user";

@@ -58,7 +58,7 @@ export default function PreviousChecklist({
 
   const handleLoadAll = () => {
     if (!hasPreviousItems) {
-      setMessage("저장된 직전 체크리스트가 없습니다.");
+      setMessage("저장된 최근 목록이 없습니다.");
       return;
     }
 
@@ -79,7 +79,7 @@ export default function PreviousChecklist({
   const handleDeletePrevious = () => {
     if (
       !window.confirm(
-        "직전 체크리스트를 삭제할까요? 현재 보충진열 체크리스트는 유지됩니다."
+        "최근 목록을 삭제할까요? 현재 보충진열 체크리스트는 유지됩니다."
       )
     ) {
       return;
@@ -87,7 +87,7 @@ export default function PreviousChecklist({
 
     onDeletePrevious();
     setSelectedIds([]);
-    setMessage("직전 체크리스트를 삭제했습니다.");
+    setMessage("최근 목록을 삭제했습니다.");
   };
 
   const handleDeleteItem = (id: string) => {
@@ -95,14 +95,14 @@ export default function PreviousChecklist({
     setSelectedIds((prev) =>
       prev.filter((selectedId) => selectedId !== id)
     );
-    setMessage("직전 체크리스트 항목을 삭제했습니다.");
+    setMessage("최근 목록 항목을 삭제했습니다.");
   };
 
   return (
     <section className="card previous-checklist-card">
       <div className="previous-checklist-header">
         <div>
-          <h2 className="section-title">직전 체크리스트</h2>
+          <h2 className="section-title">최근 목록에서 추가</h2>
           <p className="section-desc">
             오늘도 필요한 항목만 선택하세요
           </p>
@@ -115,7 +115,7 @@ export default function PreviousChecklist({
               className="text-btn text-btn--danger"
               onClick={handleDeletePrevious}
             >
-              직전 목록 삭제
+              최근 목록 삭제
             </button>
           </div>
         )}
@@ -126,12 +126,12 @@ export default function PreviousChecklist({
         className="secondary-btn"
         onClick={handleLoadAll}
       >
-        직전 체크리스트 불러오기
+        최근 목록 전체 추가
       </button>
 
       {!hasPreviousItems ? (
         <p className="empty-state previous-empty">
-          저장된 직전 체크리스트가 없습니다.
+          저장된 최근 목록이 없습니다.
         </p>
       ) : (
         <>
